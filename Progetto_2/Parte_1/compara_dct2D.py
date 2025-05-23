@@ -57,4 +57,4 @@ def benchmark_dct2(N_values, repeats=10):
 
 if __name__ == "__main__":
     N_values = list(range(4, 132, 12))  # oppure range(4, 128+1, 16)
-    benchmark_dct2(N_values, repeats=10)  # puoi aumentare a 100 per medie più stabili
+    benchmark_dct2(N_values, repeats=10)
