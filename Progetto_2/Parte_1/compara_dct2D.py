@@ -8,16 +8,13 @@ from scipy.fftpack import dct, idct
 from dct_2D import dct_2D, idct_2D
 
 
-# -------------------------
 # DCT 2D fast usando scipy
-# -------------------------
 def dct_2D_fast(matrix):
     return dct(dct(matrix.T, norm='ortho').T, norm='ortho')
 
 
-# -------------------------
+
 # Misura tempi e traccia grafico
-# -------------------------
 def benchmark_dct2(N_values, repeats=10):
     custom_times = []
     fast_times = []
@@ -56,5 +53,5 @@ def benchmark_dct2(N_values, repeats=10):
     plt.show()
 
 if __name__ == "__main__":
-    N_values = list(range(4, 132, 12))  # oppure range(4, 128+1, 16)
+    N_values = list(range(4, 132, 12))  # oppure range(4, 256, 16)
     benchmark_dct2(N_values, repeats=10)
