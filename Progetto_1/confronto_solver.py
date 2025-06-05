@@ -2,14 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from collections import defaultdict
-from scipy.io import mmread
+from scipy.io import mmread, mmwrite
 from solvers import jacobi, gauss_seidel, gradiente, gradiente_coniugato
 import os
 
 
 def carica_matrice(nome_file):
-    A = mmread(nome_file)
-    return A.toarray() if hasattr(A, 'toarray') else A
+    try:
+        A = mmread(nome_file)
+        return A.toarray() if hasattr(A, 'toarray') else A
+    except Exception as e:
+        print(f"[ERRORE] Impossibile caricare il file '{nome_file}': {e}")
+        return None
 
 
 def confronta_solver(A, tol, nmax):
@@ -28,15 +32,28 @@ def confronta_solver(A, tol, nmax):
 
     for nome, metodo in metodi.items():
         try:
+            # Chiamata al metodo
             x, nit, tempo, err = metodo(A, b, x0, tol, nmax)
-            rel_err = np.linalg.norm(x - x_exact) / np.linalg.norm(x_exact)
-            risultati[nome] = {
-                'iterazioni': nit,
-                'tempo': tempo,
-                'errore': rel_err
-            }
+
+            # Se il metodo ha restituito x = None, consideriamo il fallimento
+            if x is None:
+                print(f"[ERRORE] {nome} ha restituito None, salto calcolo errore relativo.")
+                risultati[nome] = {
+                    'iterazioni': None,
+                    'tempo': None,
+                    'errore': None
+                }
+            else:
+                # Calcolo dell'errore relativo rispetto a x_exact
+                rel_err = np.linalg.norm(x - x_exact) / np.linalg.norm(x_exact)
+                risultati[nome] = {
+                    'iterazioni': nit,
+                    'tempo': tempo,
+                    'errore': rel_err
+                }
+
         except Exception as e:
-            print(f"{nome} fallito: {e}")
+            print(f"[ERRORE] {nome} fallito: {e}")
             risultati[nome] = {
                 'iterazioni': None,
                 'tempo': None,
@@ -77,7 +94,8 @@ def plot_risultati(nome_matrice, tol, risultati):
     plt.subplots_adjust(top=0.85)
     output_name = f'confronto_{nome_matrice}_tol{str(tol).replace("-", "")}.png'
     plt.savefig(output_name)
-    plt.close()
+    plt.close()  # Chiudiamo la figura senza chiamare plt.show()
+
 
 def salva_csv(risultati_totali, nome_file="risultati_aggregati.csv"):
     intestazioni = ["Matrice", "Tolleranza", "Metodo", "Iterazioni", "Tempo (s)", "Errore Relativo"]
@@ -87,7 +105,7 @@ def salva_csv(risultati_totali, nome_file="risultati_aggregati.csv"):
         for r in risultati_totali:
             writer.writerow([r["matrice"], r["tol"], r["metodo"],
                              r["iterazioni"], r["tempo"], r["errore"]])
-    print(f"\n✅ Risultati salvati in '{nome_file}'")
+    print(f"\nRisultati salvati in '{nome_file}'")
 
 
 def plot_tempi_medi(risultati_totali):
@@ -106,14 +124,14 @@ def plot_tempi_medi(risultati_totali):
     plt.title("Tempi medi per metodo (su tutte le matrici/tolleranze)")
     plt.tight_layout()
     plt.savefig("grafico_tempi_medi.png")
-    plt.show()
-
+    # non chiamiamo plt.show() per evitare errori con il backend di PyCharm
+    plt.close()
 
 
 if __name__ == "__main__":
     file_matrici = ["spa1.mtx", "spa2.mtx", "vem1.mtx", "vem2.mtx"]
     tolleranze = [1e-4, 1e-6, 1e-8, 1e-10]
-    nmax = 20000 # maxIter
+    nmax = 20000  # maxIter
 
     risultati_totali = []
 
@@ -126,7 +144,10 @@ if __name__ == "__main__":
             print(f"\n--- Tolleranza: {tol} ---")
             risultati = confronta_solver(A, tol, nmax)
             for metodo, res in risultati.items():
-                print(f"{metodo:20s} | iter: {res['iterazioni']}, tempo: {res['tempo']:.4f}s, errore: {res['errore']:.2e}")
+                # formattazione sicura per tempo e errore
+                tempo_str = f"{res['tempo']:.4f}s" if res['tempo'] is not None else "fallito"
+                errore_str = f"{res['errore']:.2e}" if res['errore'] is not None else "N/A"
+                print(f"{metodo:20s} | iter: {res['iterazioni']}, tempo: {tempo_str}, errore: {errore_str}")
                 risultati_totali.append({
                     "matrice": nome_matrice,
                     "tol": tol,
