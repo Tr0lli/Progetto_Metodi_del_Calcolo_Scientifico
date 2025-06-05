@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 from collections import defaultdict
-from scipy.io import mmread, mmwrite
+from scipy.io import mmread
 from solvers import jacobi, gauss_seidel, gradiente, gradiente_coniugato
 import os
 
@@ -94,7 +94,7 @@ def plot_risultati(nome_matrice, tol, risultati):
     plt.subplots_adjust(top=0.85)
     output_name = f'confronto_{nome_matrice}_tol{str(tol).replace("-", "")}.png'
     plt.savefig(output_name)
-    plt.close()  # Chiudiamo la figura senza chiamare plt.show()
+    plt.close()
 
 
 def salva_csv(risultati_totali, nome_file="risultati_aggregati.csv"):
@@ -124,7 +124,6 @@ def plot_tempi_medi(risultati_totali):
     plt.title("Tempi medi per metodo (su tutte le matrici/tolleranze)")
     plt.tight_layout()
     plt.savefig("grafico_tempi_medi.png")
-    # non chiamiamo plt.show() per evitare errori con il backend di PyCharm
     plt.close()
 
 

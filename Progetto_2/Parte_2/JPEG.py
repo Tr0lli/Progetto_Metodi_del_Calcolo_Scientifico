@@ -94,7 +94,7 @@ class JPEGGui:
                 messagebox.showerror("Errore", f"Errore nel caricamento immagine: {e}")
 
     def dct2(self, block):
-        # DCT sulle colonne
+        # DCT sulle colonne e sulle righe
         return dct(dct(block.T, norm='ortho').T, norm='ortho')
 
     def idct2(self, block):

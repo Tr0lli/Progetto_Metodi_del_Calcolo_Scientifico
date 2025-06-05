@@ -39,7 +39,7 @@ def jacobi(A, b, x0, tol, nmax):
 
     start_time = time.time()
 
-    # Iterazione: while ||xnew - xold||_∞ > tol e nit < nmax
+    # Iterazione: while ||xnew - xold|| > tol e nit < nmax
     while np.linalg.norm(xnew - xold, ord=np.inf) > tol and nit < nmax:
         xold = xnew.copy()
         xnew = D_inv @ (B @ xold + b)
@@ -177,7 +177,7 @@ def gradiente_coniugato(A, b, x0, tol, nmax):
     # Inizializzazione delle variabili
     xk = x0.astype(float)
     r = b - A @ xk                # r^(0) = b - A x^(0)
-    d = r.copy()                  # d^(0) = r^(0)
+    d = r.copy()
     # Errore relativo iniziale = ||b - A x^(0)|| / ||x^(0)||
     norm_xk = np.linalg.norm(xk)
     if norm_xk == 0:
@@ -203,8 +203,8 @@ def gradiente_coniugato(A, b, x0, tol, nmax):
         r = b - A @ xk             # r^(k+1) = b - A x^(k+1)
         w = A @ r                  # w^(k) = A r^(k+1)
 
-        num_beta = d @ w           # d^(k)^T A r^(k+1)
-        denom_beta = denom         # = d^(k)^T A d^(k)
+        num_beta = d @ w
+        denom_beta = denom
         if denom_beta == 0 or np.isnan(denom_beta) or np.isinf(denom_beta):
             print(f"[Stop] Iterazione {nit}: denominatore per beta non valido (denom_beta = {denom_beta})")
             break
@@ -220,7 +220,7 @@ def gradiente_coniugato(A, b, x0, tol, nmax):
     return xk, nit, tempo, err
 
 
-# Test rapido se eseguito come script
+# Test rapido sui metodi presenti
 if __name__ == "__main__":
     A = np.array([[4, -1, 0, 0],
                   [-1, 4, -1, 0],
